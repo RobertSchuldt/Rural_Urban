@@ -193,7 +193,7 @@ run;
 
 data puf_merge (rename = (Provider_ID = CMS_Certification_Number__CCN_)) ;
 	set puf_&td;
-	keep Provider_ID Distinct_Beneficiaries__non_LUPA  Average_Number_of_Total_Visits_P Dual_Beneficiar White_Beneficiar Male Average_HCC_Score  percent_non_white percent_female percent_dual;
+	keep Provider_ID Distinct_Beneficiaries__non_LUPA episodes_per_bene Average_Number_of_Total_Visits_P Dual_Beneficiar White_Beneficiar Male Average_HCC_Score  percent_non_white percent_female percent_dual;
 
 		array puf (3)   Dual_Beneficiaries White_Beneficiaries Male_Beneficiaries ;
 		array char_puf (3)   Dual_Beneficiar White_Beneficiar Male ;
@@ -205,9 +205,10 @@ data puf_merge (rename = (Provider_ID = CMS_Certification_Number__CCN_)) ;
 
 			end;
 
-		percent_female = ((Distinct_Beneficiaries__non_LUPA - Male)/Distinct_non_LUPA)*100;
+		percent_female = ((Distinct_Beneficiaries__non_LUPA - Male)/Distinct_Beneficiaries__non_LUPA)*100;
 		percent_dual = (Dual_Beneficiar/Distinct_Beneficiaries__non_LUPA)*100;
-		percent_non_white = ( ( Distinct_Beneficiaries__non_LUPA - White_Beneficiar)/Distinct_non_LUPA)*100;
+		percent_non_white = ( ( Distinct_Beneficiaries__non_LUPA - White_Beneficiar)/Distinct_Beneficiaries__non_LUPA)*100;
+		episodes_per_bene =  Distinct_Beneficiaries__non_LUPA/VAR7;
 run;
 		
 %sort( puf_merge, CMS_Certification_Number__CCN_)
@@ -281,9 +282,148 @@ by fips;
 if a;
 if b;
 run;
+/* Adding in the CMS designated low density, high utlization counties*/
+
+proc import datafile = "\\FileSrv1\CMS_Caregiver\DATA\Rural Urban Project\FIPS Codes and County Names and their rural add-on category"
+dbms = xls out = high replace;
+run;
+
+data high_util (rename = (FIPS_State_and_County_Code__requ = fips));
+	set high;
+run;
+
+%sort(high_util, fips)
+%sort(complete_set_&td, fips)
+data complete_high;
+merge complete_set_&td (in = a) high_util ( in = b);
+by fips;
+if a;
+run;
+
+
 
 /* The above code should create the complete data set that was used for our analysis. Please let me know if you have any other questions
 that I can answer for you.*/
 data primary.complete_data_&td;
-set complete_set_&td;
+set complete_high;
 run;
+
+
+proc surveyreg data = primary.complete_data_&td;
+cluster state;
+weight Distinct_Beneficiaries__non_LUPA;
+model hospital1 = micro_metro remote_rural adj_rural percent_non_white percent_female tenure not_for_profit poverty 
+percap_hosp_bed14 percap_pcp_15 percent_dual;
+run;
+
+/* Requested regressions from Dr. Landes */
+
+
+
+
+title 'Regression Models for Dr. Landes';
+title2 'Order: M1 M2 M3 M4';
+
+ods escapechar = '^';
+goptions reset=all hsize=7in vsize=2in;
+ods pdf file='\\FileSrv1\CMS_Caregiver\DATA\HRRP\Output\regression_output.pdf' 
+startpage=no; 
+
+ods pdf text = "^{newline 4}"; 
+ods pdf text = "^{style [just=center]}Regression Output";
+
+proc surveyreg data = primary.complete_data_&td;
+model daily_score = micro_metro remote_rural adj_rural;
+run;
+
+proc surveyreg data = primary.complete_data_&td;
+cluster state;
+model daily_score = micro_metro remote_rural adj_rural;
+run;
+
+proc surveyreg data = primary.complete_data_&td;
+weight Distinct_Beneficiaries__non_LUPA;
+model daily_score = micro_metro remote_rural adj_rural;
+run;
+
+proc surveyreg data = primary.complete_data_&td;
+cluster state;
+weight Distinct_Beneficiaries__non_LUPA;
+model daily_score = micro_metro remote_rural adj_rural ;
+run;
+
+
+ods pdf close;
+
+proc format;
+value id
+0 = 'No'
+1 = 'Yes'
+;
+run;
+
+proc format;
+value r
+0 = 'Q1'
+1 = 'Q2'
+2 = 'Q3'
+3 = 'Q4'
+;
+run;
+
+
+title 'Dr. Chen Request for Utlization';
+title2 'Impact of New Rural Payments Policy';
+
+ods escapechar = '^';
+goptions reset=all hsize=7in vsize=2in;
+ods pdf file='\\FileSrv1\CMS_Caregiver\DATA\HRRP\Output\payment_policy.pdf' 
+startpage=no;
+
+proc freq;
+table micro_metro*Rural_Add_on_Category adj_rural*Rural_Add_on_Category remote_rural*Rural_Add_on_Category;
+format micro_metro id. adj_rural id. remote_rural id. ; 
+run;
+
+ods pdf close;
+*/
+/*
+
+While this section of code works. A CMS data set was located that identies
+the high utlization counties that we were looking for and attempting to 
+create with this section of the program. Will keep on the end in case it
+is needed in the future
+****************************************************************************
+title 'Dr. Chen Request for Utlization';
+title2 'Impact of New Rural Payments Policy';
+
+ods escapechar = '^';
+goptions reset=all hsize=7in vsize=2in;
+ods pdf file='\\FileSrv1\CMS_Caregiver\DATA\HRRP\Output\payment_policy.pdf' 
+startpage=no; 
+
+ods pdf text = "^{newline 4}"; 
+ods pdf text = "^{style [just=center]}Tables";
+proc rank  data = primary.complete_data_&td out = ranked groups = 4;
+	var episodes_per_bene;
+	ranks rank_ut;
+run;
+
+
+
+data payment_policy;
+	set ranked;
+proc freq; 
+table (micro_metro adj_rural remote_rural)*rank_ut;
+where micro_metro = 1 or adj_rural = 1 or remote_rural = 1;
+format micro_metro id. adj_rural id. remote_rural id. rank_ut r.;
+run;
+
+proc freq;
+table (low_density)*rank_ut;
+where urban ne 1;
+format low_density id. rank_ut r.;
+run;
+
+ods pdf close;
+*/
