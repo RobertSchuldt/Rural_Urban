@@ -386,8 +386,8 @@ format micro_metro id. adj_rural id. remote_rural id. ;
 run;
 
 ods pdf close;
-*/
-/*
+
+/
 
 While this section of code works. A CMS data set was located that identies
 the high utlization counties that we were looking for and attempting to 
@@ -399,7 +399,7 @@ title2 'Impact of New Rural Payments Policy';
 
 ods escapechar = '^';
 goptions reset=all hsize=7in vsize=2in;
-ods pdf file='\\FileSrv1\CMS_Caregiver\DATA\HRRP\Output\payment_policy.pdf' 
+ods pdf file='\\FileSrv1\CMS_Caregiver\DATA\HRRP\Output\payment_policy_old.pdf' 
 startpage=no; 
 
 ods pdf text = "^{newline 4}"; 
