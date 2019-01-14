@@ -241,7 +241,11 @@ data ahrf;
 
 				remote_rural = 0;
 				if f1255913 = "9" or f1255913 = "10" or f1255913 = "12" or f1255913 = "11" then remote_rural = 1;
+				
+				/* Adjusting two areas that CMS considers Urban but our Data does not*/
 
+				if fips = "16083" or "40047" then urban = 1;
+			
 			/*makeing FIPS variable*/
 
 				fips = f00002;
@@ -387,7 +391,12 @@ run;
 
 ods pdf close;
 
-/
+proc means;
+var (not_for_profit for_profit)*Average_HCC_Score;
+run;
+
+
+/*
 
 While this section of code works. A CMS data set was located that identies
 the high utlization counties that we were looking for and attempting to 
