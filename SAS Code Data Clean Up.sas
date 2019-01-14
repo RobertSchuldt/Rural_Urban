@@ -244,7 +244,7 @@ data ahrf;
 				
 				/* Adjusting two areas that CMS considers Urban but our Data does not*/
 
-				if fips = "16083" or "40047" then urban = 1;
+				if fips = "16083" or fips = "40047" then urban = 1;
 			
 			/*makeing FIPS variable*/
 
@@ -310,6 +310,7 @@ run;
 that I can answer for you.*/
 data primary.complete_data_&td;
 set complete_high;
+
 run;
 
 
@@ -436,3 +437,6 @@ run;
 
 ods pdf close;
 */
+proc freq;
+table urban;
+run;
