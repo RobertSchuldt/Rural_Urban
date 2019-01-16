@@ -259,7 +259,7 @@ data ahrf;
 				hha_count = f1321415;
 
 			/*For Hospital Beds we had to use 2014 observation. This variable is VERY hard to get for some reason*/
-				percap_hosp_bed14 = (F0892115/f1198415)*1000;
+				percap_hosp_bed15 = (F0892115/f1198415)*1000;
 
 			/*Median House Hold Income*/
 				income = f1322615;
