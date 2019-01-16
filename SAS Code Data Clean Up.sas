@@ -5,7 +5,7 @@
 
 /* First identify libraries we will be using*/
 libname primary "E:\HHBVP\11-5-2018 2016 Redux";
-libname ahrf "X:\Data\AHRF\2016-2017\Data";
+libname ahrf "\\FileSrv1\CMS_Caregiver\DATA\HRRP\AHRF";
 libname puf "E:\puffiles";
 
 /* We will be using the year 2015 in many variable names*/
@@ -62,16 +62,17 @@ data date_&td;
 	/*Ownership*/
 	%let nfp = %str(not_for_profit =1;) ;
 	not_for_profit = 0;
-	if Type_of_Ownership = "Government - State/ County" then &nfp;
-	if Type_of_Ownership = "Government - Combination Government & Voluntary" then &nfp;
-	if Type_of_Ownership = "Government - Local" then &nfp;
-	if Type_of_Ownership = "Non - Profit Private" then &nfp;
-	if Type_of_Ownership = "Non - Profit Religious" then &nfp;
-	if Type_of_Ownership = "Non - Profit Other" then &nfp;
+	if Type_of_Ownership = "Government - State/ County" then &nfp and gov = 1;
+	if Type_of_Ownership = "Government - Combination Government & Voluntary" then &nfp and gov = 1;
+	if Type_of_Ownership = "Government - Local" then &nfp and gov = 1;
+	if Type_of_Ownership = "Non - Profit Private" then &nfp and nfp = 1;
+	if Type_of_Ownership = "Non - Profit Religious" then &nfp and nfp = 1;
+	if Type_of_Ownership = "Non - Profit Other" then &nfp and nfp = 1;
+	
 	
 
 	if Type_of_Ownership = "Proprietary"
-	then for_profit = 1;
+	then for_profit = 1 and fp = 1;
 		else for_profit = 0;
 	
 
@@ -224,7 +225,7 @@ run;
 /* Now I will import the AHRF file for 2016-2017.*/
 
 data ahrf;
-	set ahrf.ahrf_2016_2017;
+	set ahrf.ahrf_2017_2018;
 
 	keep low_density urban micro_metro fips adj_rural remote_rural poverty unemployment income
 		 percap_pcp_15 age_65_plus hha_count percap_hosp_bed14;  
@@ -258,7 +259,7 @@ data ahrf;
 				hha_count = f1321415;
 
 			/*For Hospital Beds we had to use 2014 observation. This variable is VERY hard to get for some reason*/
-				percap_hosp_bed14 = (f0892114/f1198415)*1000;
+				percap_hosp_bed14 = (F0892115/f1198415)*1000;
 
 			/*Median House Hold Income*/
 				income = f1322615;
