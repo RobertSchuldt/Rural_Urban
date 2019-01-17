@@ -220,11 +220,11 @@ data puf_merge (rename = (Provider_ID = CMS_Certification_Number__CCN_)) ;
 		percent_non_white = ( ( Distinct_Beneficiaries__non_LUPA - White_Beneficiar)/Distinct_Beneficiaries__non_LUPA)*100;
 		episodes_per_bene =  Distinct_Beneficiaries__non_LUPA/VAR7;
 run;
-		
+%sort( hha_pos_correct&td, CMS_Certification_Number__CCN_)	
 %sort( puf_merge, CMS_Certification_Number__CCN_)
 
 data puf_hha_pos&td;
-merge  hha_pos_&td (in = a) puf_merge (in = b);
+merge  hha_pos_correct&td (in = a) puf_merge (in = b);
 by CMS_Certification_Number__CCN_;
 if a;
 if b;
@@ -252,14 +252,15 @@ data ahrf;
 				remote_rural = 0;
 				if f1255913 = "9" or f1255913 = "10" or f1255913 = "12" or f1255913 = "11" then remote_rural = 1;
 				
-				/* Adjusting two areas that CMS considers Urban but our Data does not*/
+				
 
-				if fips = "16083" or fips = "40047" then urban = 1;
 			
 			/*makeing FIPS variable*/
 
 				fips = f00002;
-				if fips = "12025" then fips = "12086" ;
+		
+			/* Adjusting two areas that CMS considers Urban but our Data does not*/
+				if fips = "16083" or fips = "40047" then urban = 1;
 
 
 			/* Per Cap Physicians */
@@ -329,7 +330,7 @@ proc surveyreg data = primary.complete_data_&td;
 cluster state;
 weight Distinct_Beneficiaries__non_LUPA;
 model hospital1 = micro_metro remote_rural adj_rural percent_non_white percent_female tenure not_for_profit poverty 
-percap_hosp_bed14 percap_pcp_15 percent_dual;
+percap_hosp_bed15 percap_pcp_15 percent_dual;
 run;
 
 /* Requested regressions from Dr. Landes */
