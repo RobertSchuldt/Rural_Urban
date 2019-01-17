@@ -62,24 +62,33 @@ data date_&td;
 	/*Ownership*/
 	%let nfp = %str(not_for_profit =1;) ;
 	not_for_profit = 0;
-	if Type_of_Ownership = "Government - State/ County" then &nfp and gov = 1;
-	if Type_of_Ownership = "Government - Combination Government & Voluntary" then &nfp and gov = 1;
-	if Type_of_Ownership = "Government - Local" then &nfp and gov = 1;
-	if Type_of_Ownership = "Non - Profit Private" then &nfp and nfp = 1;
-	if Type_of_Ownership = "Non - Profit Religious" then &nfp and nfp = 1;
-	if Type_of_Ownership = "Non - Profit Other" then &nfp and nfp = 1;
+	if Type_of_Ownership = "Government - State/ County" then &nfp;
+	if Type_of_Ownership = "Government - State/ County" then gov = 1;
+	if Type_of_Ownership = "Government - Combination Government & Voluntary" then &nfp;
+	if Type_of_Ownership = "Government - Combination Government & Voluntary" then gov = 1;
+	if Type_of_Ownership = "Government - Local" then &nfp;
+	if Type_of_Ownership = "Government - Local" then gov = 1;
+	if Type_of_Ownership = "Non - Profit Private" then &nfp;
+	if Type_of_Ownership = "Non - Profit Private" then nfp = 1;
+	if Type_of_Ownership = "Non - Profit Religious" then &nfp;
+	if Type_of_Ownership = "Non - Profit Religious" then nfp = 1;
+	if Type_of_Ownership = "Non - Profit Other" then &nfp;
+	if Type_of_Ownership = "Non - Profit Other" then nfp = 1;
 	
 	
-
+	fp = 0;
+	if Type_of_Ownership = "Proprietary" then fp =1;
 	if Type_of_Ownership = "Proprietary"
-	then for_profit = 1 and fp = 1;
+	then for_profit = 1 ;
 		else for_profit = 0;
 	
 
 	/* High Quality Indicator*/
+	length star_num 3.;
+	star_num = star;
 
-	if star = "4" or "5" then high_quality = 1;
-	if star = "1" or "2" or "3" then high_quality = 0;
+	if star_num ge 4 then high_quality = 1;
+	if star_num lt 4 then high_quality = 0;
 	if star ="." then high_quality = .;
 
 run;
@@ -184,7 +193,7 @@ data hha_pos_&td;
 /* One FIPS code needs to be changed because it was adjusted in future data*/
 	data hha_pos_correct&td;
 		set hha_pos_&td;
-		if fips = "12086" then fips ="12025";
+		if fips = "12025" then fips ="12086";
 	run;
 /* Now w e bring in the PUF file to get our information on race and HCC score */
 
@@ -228,7 +237,7 @@ data ahrf;
 	set ahrf.ahrf_2017_2018;
 
 	keep low_density urban micro_metro fips adj_rural remote_rural poverty unemployment income
-		 percap_pcp_15 age_65_plus hha_count percap_hosp_bed14;  
+		 percap_pcp_15 age_65_plus hha_count percap_hosp_bed15;  
 			/* Making the rural encoding variables*/
 				
 				urban = 0;
@@ -250,6 +259,7 @@ data ahrf;
 			/*makeing FIPS variable*/
 
 				fips = f00002;
+				if fips = "12025" then fips = "12086" ;
 
 
 			/* Per Cap Physicians */
