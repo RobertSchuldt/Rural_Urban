@@ -32,7 +32,7 @@ data puf_merge ;
 
 			end;
 
-		PRVDR_NUM = put(provider_id, 10. -l);
+		PRVDR_NUM = put(provider_id, -l);
 
 		percent_female = ((Distinct_Beneficiaries__non_LUPA - Male)/Distinct_Beneficiaries__non_LUPA)*100;
 		percent_dual = (Dual_Beneficiar/Distinct_Beneficiaries__non_LUPA)*100;
