@@ -93,6 +93,7 @@ data date_&td;
 
 run;
 
+
 /* Now we create out ID variables to ensure that we calculate the correct measurements 
 However, since we have completed this in the past, we know that the ID variable is redundant because
 the agency has either ALL or NONE of the measurements for a particular composite score*/
@@ -119,8 +120,14 @@ data id_&td;
 			 if id(i) = . then id(i) = 0;
 			 if place(i) ge 1 then id(i) = 1;
 			 	else id(i) = 0;
+/*
+			if place(i) = . then place(i) = 0;
+*/
 		end;
-		
+/*
+	if hospital = . then hospital1=.;
+	if emergency = . then emergency1 = .;
+*/
 	run;
 
 data composite_&td;
@@ -449,6 +456,6 @@ run;
 
 ods pdf close;
 */
-proc freq;
-table urban;
+proc univariate;
+var daily_score wound_score pain_score harm_score hospital1 emergency1 ;
 run;
