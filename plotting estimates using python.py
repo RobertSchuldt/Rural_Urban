@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-df = pd.read_csv("C:\\Users\\3043340\\Desktop\\Box Sync\\Schuldt Research Work\\HHBVP\\11-5-2018 2016 Redux\\plottingpython2.csv", header = 0)
+df = pd.read_csv("C:\\Users\\3043340\\Box\\Schuldt Research Work\\HHBVP\\11-5-2018 2016 Redux\\plottingpython2.csv", header = 0)
 
 df2 = df[['MSR', 'URB_RUR', 'Estimate', 'Upper', 'Lower']]
 df2 = df2.drop(['Estimate'], axis = 1)
@@ -31,9 +31,13 @@ df = df.append(df3)
 
 
 sns.set(rc={'figure.figsize':(11.7, 8.27)})
-ax=sns.pointplot(x='MSR', y= 'Estimate', hue='URB_RUR', size= 'RUR_URB', join= False,  data= df, dodge=.5 ,order= [ 'HOSPITAL','EMERGENCY', 'HARM','DAILY', 'WOUND','PAIN','STAR'])
-ax.set_title('Comparison of Z Scores of Home Health Quality Measurements by Rurality')
-ax.set(xlabel= 'Quality Measurements', ylabel= 'Z Scores with Confidence Intervals')
+ax=sns.pointplot(x='MSR', y= 'Estimate', hue='URB_RUR', size= 'RUR_URB', join= False,  data= df, dodge=.5 ,
+                 order= [ 'Hospitalizations','ED Visits', 'Patient-experience Star Ratings', 'ADL Improvement', 'Pain Management Improvement', 'Harm Prevention', 'Treating Wounds'])
+ax.set_title('')
+ax.set(xlabel= ' ', ylabel= 'Z Scores with Confidence Intervals')
 ax.legend().set_title('Rurality Level')
 
+
+for item in ax.get_xticklabels():
+    item.set_rotation(45)
 plt.show()
